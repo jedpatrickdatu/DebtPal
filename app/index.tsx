@@ -26,46 +26,44 @@ export default function Index() {
     setDebts([...debts, debt]);
   }
 
-  const app = () => {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.text}>DebtPal</Text>
-        <Link href="/menu" style={{ marginHorizontal: 'auto' }} asChild>
-          <Pressable style={styles.button}>
-            <Text style={styles.buttonText}>Menuz</Text>
-          </Pressable>
-        </Link>
-        <Link href="/create-debt" style={{ marginHorizontal: 'auto' }} asChild>
-          <Pressable style={styles.button}>
-            <Text style={styles.buttonText}>Create Debt</Text>
-          </Pressable>
-        </Link>
-        <DebtContainer>
-            <FlatList
-                data={debts}
-                keyExtractor={(item) => item.id.toString()}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.contentContainer}
-                // ItemSeparatorComponent={separatorComp}
-                // ListFooterComponent={footerComp}
-                ListFooterComponentStyle={styles.footer}
-                ListEmptyComponent={<Text>No items</Text>}
-                renderItem={({ item }) => (
-                    <View style={styles.row}>
-                        <View style={styles.menuTextRow}>
-                            <Text style={[styles.menuItemTitle, styles.menuItemText]}>{item.amount}</Text>
-                        </View>
-                        {/* <Image
-                            source={MENU_IMAGES[item.id - 1]}
-                            style={styles.menuImage}
-                        /> */}
-                    </View>
-                )}
-            />
-        </DebtContainer>
-      </View>
-    )
-  }
+  return (
+    <View style={styles.container}>
+      <Text style={styles.text}>DebtPal</Text>
+      <Link href="/menu" style={{ marginHorizontal: 'auto' }} asChild>
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>Menuz</Text>
+        </Pressable>
+      </Link>
+      <Link href="/create-debt" style={{ marginHorizontal: 'auto' }} asChild>
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>Create Debt</Text>
+        </Pressable>
+      </Link>
+      <DebtContainer>
+          <FlatList
+              data={debts}
+              keyExtractor={(item) => item.id.toString()}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.contentContainer}
+              // ItemSeparatorComponent={separatorComp}
+              // ListFooterComponent={footerComp}
+              ListFooterComponentStyle={styles.footer}
+              ListEmptyComponent={<Text>No items</Text>}
+              renderItem={({ item }) => (
+                  <View style={styles.row}>
+                      <View style={styles.menuTextRow}>
+                          <Text style={[styles.menuItemTitle, styles.menuItemText]}>{item.amount}</Text>
+                      </View>
+                      {/* <Image
+                          source={MENU_IMAGES[item.id - 1]}
+                          style={styles.menuImage}
+                      /> */}
+                  </View>
+              )}
+          />
+      </DebtContainer>
+    </View>
+  )
 }
 
 function createStyles(theme, colorScheme) {

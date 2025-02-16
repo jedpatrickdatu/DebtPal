@@ -1,20 +1,22 @@
 import { View, Text, StyleSheet, Pressable, Platform, ScrollView, TextInput, Appearance } from 'react-native'
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Colors } from '@/constants/Colors';
 import { Inter_500Medium, useFonts } from "@expo-google-fonts/inter";
+import { ThemeContext } from '@/context/ThemeContext';
+import Octicons from '@expo/vector-icons/Octicons';
+import Animated, { LinearTransition } from 'react-native-reanimated';
 
 export default function CreateDebt() {
-  const colorScheme = Appearance.getColorScheme();
-  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
-  const styles = createStyles(theme, colorScheme);
   const Container = Platform.OS === 'web' ? ScrollView : GestureHandlerRootView;
-
+  const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
   const [debtorName, setDebtorName] = useState('');
   const [amount, setAmount] = useState(0);
   const [loaded, error] = useFonts({
     Inter_500Medium,
   });
+
+  const styles = createStyles(theme, colorScheme);
   
   if (!loaded && !error) {
     return null;
@@ -36,6 +38,15 @@ export default function CreateDebt() {
         <Pressable onPress={createDebt} style={styles.addButton}>
           <Text style={styles.addButtonText}>Create</Text>
         </Pressable>
+        <Pressable
+          onPress={() => setColorScheme(colorScheme === 'light' ? 'dark' : 'light')}
+          style={{ marginLeft: 10 }}
+        >
+          {colorScheme === 'dark' ?
+            <Octicons name="moon" size={36} color={theme.text} selectable={undefined} style={{ width: 36 }} /> :
+            <Octicons name="sun" size={36} color={theme.text} selectable={undefined} style={{ width: 36 }} />
+          }
+        </Pressable>
       </View>
     </Container>
   );
@@ -44,7 +55,7 @@ export default function CreateDebt() {
 function createStyles(theme, colorScheme) {
   return StyleSheet.create({
     container: {
-      backgroundColor: 'black',
+      backgroundColor: theme.background,
       flex: 1,
     },
     inputContainer: {
@@ -66,17 +77,17 @@ function createStyles(theme, colorScheme) {
       marginRight: 10,
       fontSize: 18,
       minWidth: 0,
-      color: 'white',
+      color: theme.text,
       fontFamily: 'Inter_500Medium',
     },
     addButton: {
-      backgroundColor: 'white',
+      backgroundColor: theme.button,
       borderRadius: 5,
       padding: 10,
     },
     addButtonText: {
       fontSize: 18,
-      color: 'black',
+      color: colorScheme === 'dark' ? 'black' : 'white',
     }
   });
 }
