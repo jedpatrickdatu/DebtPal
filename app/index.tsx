@@ -1,11 +1,15 @@
 import { View, Text, StyleSheet, Pressable, Platform, ScrollView, Image, Appearance } from 'react-native'
 import { Link } from 'expo-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GestureHandlerRootView, FlatList } from "react-native-gesture-handler";
 import { debtsData } from '@/data/Debts';
 import { Colors } from '@/constants/Colors';
+import Animated, { LinearTransition } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StatusBar } from 'expo-status-bar';
 
 import { Inter_500Medium, useFonts } from "@expo-google-fonts/inter";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function Index() {
   const colorScheme = Appearance.getColorScheme();
@@ -13,34 +17,86 @@ export default function Index() {
   const styles = createStyles(theme, colorScheme);
   const DebtContainer = Platform.OS === 'web' ? ScrollView : GestureHandlerRootView;
 
-  const [debts, setDebts] = useState(debtsData.sort((a: any, b: any) => b.id - a.id));
+  const [debts, setDebts] = useState([]);
   const [loaded, error] = useFonts({
     Inter_500Medium,
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("DebtPal");
+        const storageDebts = jsonValue != null ? JSON.parse(jsonValue) : null;
+
+        const debtDataToUse = storageDebts && storageDebts.length ? storageDebts : debtsData;
+        setDebts(debtDataToUse.sort((a: any, b: any) => b.id - a.id));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchData();
+  }, [debtsData]);
+
+  useEffect(() => {
+    const storeData = async () => {
+      try {
+        const jsonValue = JSON.stringify(debts);
+        await AsyncStorage.setItem("DebtPal", jsonValue);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    storeData();
+  }, [debts]);
 
   if (!loaded && !error) {
     return null;
   }
 
-  const addDebt = (debt: any) => {
-    setDebts([...debts, debt]);
-  }
+  const deleteDebt = async (debtId: string) => {
+    const jsonDebts = await AsyncStorage.getItem("DebtPal");
+    const storageDebts = jsonDebts != null ? JSON.parse(jsonDebts) : null;
+    const savedDebts = storageDebts && storageDebts.length ? storageDebts : [];
+
+    const updatedDebts = savedDebts.filter((debt => debt.id !== debtId));
+    const jsonValue = JSON.stringify(updatedDebts);
+    setDebts(updatedDebts);
+
+    await AsyncStorage.setItem("DebtPal", jsonValue);
+  };
+
+  const renderDebtListItem = ({ item }) => (
+    <View style={styles.row}>
+        <View style={styles.menuTextRow}>
+            <Text style={[styles.menuItemTitle, styles.menuItemText]}>{item.debtor}</Text>
+            <Text style={[styles.menuItemTitle, styles.menuItemText]}>{item.amount}</Text>
+            <Pressable onPress={() => deleteDebt(item.id)}>
+              <MaterialCommunityIcons name="delete-circle" size={24} color="black" />
+            </Pressable>
+        </View>
+        {/* <Image
+            source={MENU_IMAGES[item.id - 1]}
+            style={styles.menuImage}
+        /> */}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.text}>DebtPal</Text>
-      <Link href="/menu" style={{ marginHorizontal: 'auto' }} asChild>
+      {/* <Link href="/menu" style={{ marginHorizontal: 'auto' }} asChild>
         <Pressable style={styles.button}>
           <Text style={styles.buttonText}>Menuz</Text>
         </Pressable>
-      </Link>
+      </Link> */}
       <Link href="/create-debt" style={{ marginHorizontal: 'auto' }} asChild>
         <Pressable style={styles.button}>
           <Text style={styles.buttonText}>Create Debt</Text>
         </Pressable>
       </Link>
       <DebtContainer>
-          <FlatList
+          <Animated.FlatList
               data={debts}
               keyExtractor={(item) => item.id.toString()}
               showsVerticalScrollIndicator={false}
@@ -49,19 +105,24 @@ export default function Index() {
               // ListFooterComponent={footerComp}
               ListFooterComponentStyle={styles.footer}
               ListEmptyComponent={<Text>No items</Text>}
-              renderItem={({ item }) => (
-                  <View style={styles.row}>
-                      <View style={styles.menuTextRow}>
-                          <Text style={[styles.menuItemTitle, styles.menuItemText]}>{item.amount}</Text>
-                      </View>
-                      {/* <Image
-                          source={MENU_IMAGES[item.id - 1]}
-                          style={styles.menuImage}
-                      /> */}
-                  </View>
-              )}
+              itemLayoutAnimation={LinearTransition}
+              keyboardDismissMode="on-drag"
+              renderItem={renderDebtListItem}
+              // renderItem={({ item }) => (
+              //     <View style={styles.row}>
+              //         <View style={styles.menuTextRow}>
+              //             <Text style={[styles.menuItemTitle, styles.menuItemText]}>{item.debtor}</Text>
+              //             <Text style={[styles.menuItemTitle, styles.menuItemText]}>{item.amount}</Text>
+              //         </View>
+              //         {/* <Image
+              //             source={MENU_IMAGES[item.id - 1]}
+              //             style={styles.menuImage}
+              //         /> */}
+              //     </View>
+              // )}
           />
       </DebtContainer>
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </View>
   )
 }

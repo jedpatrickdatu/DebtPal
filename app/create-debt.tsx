@@ -1,17 +1,18 @@
 import { View, Text, StyleSheet, Pressable, Platform, ScrollView, TextInput, Appearance } from 'react-native'
-import { useState, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Colors } from '@/constants/Colors';
 import { Inter_500Medium, useFonts } from "@expo-google-fonts/inter";
 import { ThemeContext } from '@/context/ThemeContext';
 import Octicons from '@expo/vector-icons/Octicons';
 import Animated, { LinearTransition } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreateDebt() {
   const Container = Platform.OS === 'web' ? ScrollView : GestureHandlerRootView;
   const { colorScheme, setColorScheme, theme } = useContext(ThemeContext);
-  const [debtorName, setDebtorName] = useState('');
-  const [amount, setAmount] = useState(0);
+  const [debtor, setDebtor] = useState('');
+  const [amount, setAmount] = useState('0');
   const [loaded, error] = useFonts({
     Inter_500Medium,
   });
@@ -21,8 +22,18 @@ export default function CreateDebt() {
   if (!loaded && !error) {
     return null;
   }
-  
-  const createDebt = (debt: any) => {
+
+  const createDebt = async (debt: any) => {
+    const jsonDebts = await AsyncStorage.getItem("DebtPal");
+    const storageDebts = jsonDebts != null ? JSON.parse(jsonDebts) : null;
+    const savedDebts = storageDebts && storageDebts.length ? storageDebts : [];
+
+    const jsonValue = JSON.stringify([...savedDebts, {id: getUUID(), debtor, amount,}]);
+    await AsyncStorage.setItem("DebtPal", jsonValue);
+  }
+
+  const getUUID = (): string => {
+    return Date.now().toString(36);
   }
 
   return (
@@ -32,8 +43,16 @@ export default function CreateDebt() {
           style={styles.input}
           placeholder="Debtor name"
           placeholderTextColor="gray"
-          value={debtorName}
-          onChangeText={setDebtorName}
+          value={debtor}
+          onChangeText={setDebtor}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Amount"
+          placeholderTextColor="gray"
+          keyboardType='numeric'
+          value={amount}
+          onChangeText={setAmount}
         />
         <Pressable onPress={createDebt} style={styles.addButton}>
           <Text style={styles.addButtonText}>Create</Text>
