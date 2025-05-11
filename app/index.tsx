@@ -1,15 +1,18 @@
-import { View, Text, StyleSheet, Pressable, Platform, ScrollView, Image, Appearance } from 'react-native'
+import { View, Text, StyleSheet, Pressable, Platform, ScrollView, Image, Appearance, TouchableOpacity } from 'react-native'
 import { Link } from 'expo-router'
 import { useState, useEffect } from 'react'
 import { GestureHandlerRootView, FlatList } from "react-native-gesture-handler";
 import { debtsData } from '@/data/Debts';
 import { Colors } from '@/constants/Colors';
+// import { CreateDebt } from '@/constants/Colors';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 
 import { Inter_500Medium, useFonts } from "@expo-google-fonts/inter";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/Ionicons';
+import CreateDebt from './create-debt';
 
 export default function Index() {
   const colorScheme = Appearance.getColorScheme();
@@ -18,6 +21,7 @@ export default function Index() {
   const DebtContainer = Platform.OS === 'web' ? ScrollView : GestureHandlerRootView;
 
   const [debts, setDebts] = useState([]);
+  const [isCreateDebtFormVisible, setIsCreateDebtFormVisible] = useState(false);
   const [loaded, error] = useFonts({
     Inter_500Medium,
   });
@@ -121,7 +125,13 @@ export default function Index() {
               //     </View>
               // )}
           />
+          {/* <TouchableOpacity style={styles.createDebtButton} onPress={() => setIsCreateDebtFormVisible(true)}>
+            <Icon name="add" size={30} color="#fff" />
+          </TouchableOpacity> */}
+          {/* <View style={styles.createDebtButton}>
+          </View> */}
       </DebtContainer>
+      <CreateDebt />
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </View>
   )
@@ -204,6 +214,22 @@ return StyleSheet.create({
   menuImage: {
       width: 100,
       height: 100,
-  }
+  },
+  createDebtButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 30,
+    width: 60,
+    height: 60,
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
 });
 }
