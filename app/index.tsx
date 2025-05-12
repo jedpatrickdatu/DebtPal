@@ -94,11 +94,6 @@ export default function Index() {
           <Text style={styles.buttonText}>Menuz</Text>
         </Pressable>
       </Link> */}
-      <Link href="/create-debt" style={{ marginHorizontal: 'auto' }} asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Create Debt</Text>
-        </Pressable>
-      </Link>
       <DebtContainer>
           <Animated.FlatList
               data={debts}
@@ -131,7 +126,11 @@ export default function Index() {
           {/* <View style={styles.createDebtButton}>
           </View> */}
       </DebtContainer>
-      <CreateDebt />
+      <Link href="/create-debt" asChild>
+        <TouchableOpacity style={styles.createDebtButton}>
+          <Icon name="add" size={30} color="#fff" />
+        </TouchableOpacity>
+      </Link>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </View>
   )
